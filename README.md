@@ -1,93 +1,254 @@
-# scriptassist-nestjs-exercise
+# TaskFlow API - Senior Backend Engineer Coding Challenge
 
+## Introduction
 
+Welcome to the TaskFlow API coding challenge! This project is designed to evaluate the skills of experienced backend engineers in identifying and solving complex architectural problems using our technology stack.
 
-## Getting started
+The TaskFlow API is a task management system with significant scalability, performance, and security challenges that need to be addressed. The codebase contains intentional anti-patterns and inefficiencies that require thoughtful refactoring and architectural improvements.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Tech Stack
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- **Language**: TypeScript
+- **Framework**: NestJS
+- **ORM**: TypeORM with PostgreSQL
+- **Queue System**: BullMQ with Redis
+- **API Style**: REST with JSON
+- **Package Manager**: Bun
+- **Testing**: Bun test
 
-## Add your files
+## Getting Started
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+### Prerequisites
 
-```
-cd existing_repo
-git remote add origin https://gitlab.com/script-assist-public-rajeev-prasad/scriptassist-nestjs-exercise.git
-git branch -M main
-git push -uf origin main
-```
+- Node.js (v16+)
+- Bun (latest version)
+- PostgreSQL
+- Redis
 
-## Integrate with your tools
+### Setup Instructions
 
-- [ ] [Set up project integrations](https://gitlab.com/script-assist-public-rajeev-prasad/scriptassist-nestjs-exercise/-/settings/integrations)
+1. Clone this repository
+2. Install dependencies:
+   ```bash
+   bun install
+   ```
+3. Configure environment variables by copying `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   # Update the .env file with your database and Redis connection details
+   ```
+4. Database Setup:
+   
+   Ensure your PostgreSQL database is running, then create a database:
+   ```bash
+   # Using psql
+   psql -U postgres
+   CREATE DATABASE taskflow;
+   \q
+   
+   # Or using createdb
+   createdb -U postgres taskflow
+   ```
+   
+   Build the TypeScript files to ensure the migrations can be run:
+   ```bash
+   bun run build
+   ```
 
-## Collaborate with your team
+5. Run database migrations:
+   ```bash
+   # Option 1: Standard migration (if "No migrations are pending" but tables aren't created)
+   bun run migration:run
+   
+   # Option 2: Force table creation with our custom script
+   bun run migration:custom
+   ```
+   
+   Our custom migration script will:
+   - Try to run formal migrations first
+   - If no migrations are executed, it will directly create the necessary tables
+   - It provides detailed logging to help troubleshoot database setup issues
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+6. Seed the database with initial data:
+   ```bash
+   bun run seed
+   ```
+   
+7. Start the development server:
+   ```bash
+   bun run start:dev
+   ```
 
-## Test and Deploy
+### Troubleshooting Database Issues
 
-Use the built-in continuous integration in GitLab.
+If you continue to have issues with database connections:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+1. Check that PostgreSQL is properly installed and running:
+   ```bash
+   # On Linux/Mac
+   systemctl status postgresql
+   # or
+   pg_isready
+   
+   # On Windows
+   sc query postgresql
+   ```
 
-***
+2. Verify your database credentials by connecting manually:
+   ```bash
+   psql -h localhost -U postgres -d taskflow
+   ```
 
-# Editing this README
+3. If needed, manually create the schema from the migration files:
+   - Look at the SQL in `src/database/migrations/`
+   - Execute the SQL manually in your database
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Default Users
 
-## Suggestions for a good README
+The seeded database includes two users:
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+1. Admin User:
+   - Email: admin@example.com
+   - Password: admin123
+   - Role: admin
 
-## Name
-Choose a self-explaining name for your project.
+2. Regular User:
+   - Email: user@example.com
+   - Password: user123
+   - Role: user
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## Challenge Overview
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+This codebase contains a partially implemented task management API that suffers from various architectural, performance, and security issues. Your task is to analyze, refactor, and enhance the codebase to create a production-ready, scalable, and secure application.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Core Problem Areas
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The codebase has been intentionally implemented with several critical issues that need to be addressed:
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### 1. Performance & Scalability Issues
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+- N+1 query problems throughout the application
+- Inefficient in-memory filtering and pagination that won't scale
+- Excessive database roundtrips in batch operations
+- Poorly optimized data access patterns
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### 2. Architectural Weaknesses
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+- Inappropriate separation of concerns (e.g., controllers directly using repositories)
+- Missing domain abstractions and service boundaries
+- Lack of transaction management for multi-step operations
+- Tightly coupled components with high interdependency
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### 3. Security Vulnerabilities
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+- Inadequate authentication mechanism with several vulnerabilities
+- Improper authorization checks that can be bypassed
+- Unprotected sensitive data exposure in error responses
+- Insecure rate limiting implementation
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### 4. Reliability & Resilience Gaps
 
-## License
-For open source projects, say how it is licensed.
+- Ineffective error handling strategies
+- Missing retry mechanisms for distributed operations
+- Lack of graceful degradation capabilities
+- In-memory caching that fails in distributed environments
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Implementation Requirements
+
+Your implementation should address the following areas:
+
+### 1. Performance Optimization
+
+- Implement efficient database query strategies with proper joins and eager loading
+- Create a performant filtering and pagination system
+- Optimize batch operations with bulk database operations
+- Add appropriate indexing strategies
+
+### 2. Architectural Improvements
+
+- Implement proper domain separation and service abstractions
+- Create a consistent transaction management strategy
+- Apply SOLID principles throughout the codebase
+- Implement at least one advanced pattern (e.g., CQRS, Event Sourcing)
+
+### 3. Security Enhancements
+
+- Strengthen authentication with refresh token rotation
+- Implement proper authorization checks at multiple levels
+- Create a secure rate limiting system
+- Add data validation and sanitization
+
+### 4. Resilience & Observability
+
+- Implement comprehensive error handling and recovery mechanisms
+- Add proper logging with contextual information
+- Create meaningful health checks
+- Implement at least one observability pattern
+
+## Advanced Challenge Areas
+
+For senior engineers, we expect solutions to also address:
+
+### 1. Distributed Systems Design
+
+- Create solutions that work correctly in multi-instance deployments
+- Implement proper distributed caching with invalidation strategies
+- Handle concurrent operations safely
+- Design for horizontal scaling
+
+### 2. System Reliability
+
+- Implement circuit breakers for external service calls
+- Create graceful degradation pathways for non-critical features
+- Add self-healing mechanisms
+- Design fault isolation boundaries
+
+### 3. Performance Under Load
+
+- Optimize for high throughput scenarios
+- Implement backpressure mechanisms
+- Create efficient resource utilization strategies
+- Design for predictable performance under varying loads
+
+## Evaluation Criteria
+
+Your solution will be evaluated on:
+
+1. **Problem Analysis**: How well you identify and prioritize the core issues
+2. **Technical Implementation**: The quality and cleanliness of your code
+3. **Architectural Thinking**: Your approach to solving complex design problems
+4. **Performance Improvements**: Measurable enhancements to system performance
+5. **Security Awareness**: Your identification and remediation of vulnerabilities
+6. **Testing Strategy**: The comprehensiveness of your test coverage
+7. **Documentation**: The clarity of your explanation of key decisions
+
+## Submission Guidelines
+
+1. Fork this repository to your own GitHub account
+2. Make regular, meaningful commits that tell a story
+3. Create a comprehensive README.md in your forked repository containing:
+   - Analysis of the core problems you identified
+   - Overview of your architectural approach
+   - Performance and security improvements made
+   - Key technical decisions and their rationale
+   - Any tradeoffs you made and why
+4. Ensure your repository is public so we can review your work
+5. Submit the link to your public GitHub repository
+
+## API Endpoints
+
+The API should expose the following endpoints:
+
+### Authentication
+- `POST /auth/login` - Authenticate a user
+- `POST /auth/register` - Register a new user
+
+### Tasks
+- `GET /tasks` - List tasks with filtering and pagination
+- `GET /tasks/:id` - Get task details
+- `POST /tasks` - Create a task
+- `PATCH /tasks/:id` - Update a task
+- `DELETE /tasks/:id` - Delete a task
+- `POST /tasks/batch` - Batch operations on tasks
+
+Good luck! This challenge is designed to test the skills of experienced engineers in creating scalable, maintainable, and secure systems.
