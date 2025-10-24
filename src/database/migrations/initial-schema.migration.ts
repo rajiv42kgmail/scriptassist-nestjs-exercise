@@ -23,7 +23,7 @@ export class InitialSchema1615123456789 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
-      CREATE TYPE "task_priority_enum" AS ENUM('LOW', 'MEDIUM', 'HIGH')
+      CREATE TYPE "task_status_enum" AS ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED')
     `);
 
     await queryRunner.query(`
