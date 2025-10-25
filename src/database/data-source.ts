@@ -1,6 +1,7 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { CreateInitialSchema1710752400000 } from './migrations/1710752400000-CreateInitialSchema';
+import * as process from "node:process";
 
 // Load environment variables
 dotenv.config();
@@ -20,4 +21,5 @@ export const dataSourceOptions: DataSourceOptions = {
 };
 
 const dataSource = new DataSource(dataSourceOptions);
+
 export default dataSource;
