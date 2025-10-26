@@ -53,12 +53,24 @@ export class AuthService {
 
     const user = await this.usersService.create(registerDto);
 
-  //  const token = this.generateToken(user.id);
+    const token = this.generateToken(user.id);
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role
+    };
 
     return {
-      username: user.name,
-      message:'User created successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+      token,
     };
+
   }
 
   private generateToken(userId: string) {
