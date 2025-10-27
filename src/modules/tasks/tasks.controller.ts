@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Ht
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { BatchOperationDto } from './dto/batch-tasks.dto';
+
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -32,6 +34,22 @@ export class TasksController {
   @ApiOperation({ summary: 'Create a new task' })
   create(@Body() createTaskDto: CreateTaskDto) {
     return this.tasksService.create(createTaskDto);
+  }
+  @Post('batch')
+  @ApiOperation({ summary: 'Create multiple new tasks at once' })
+  async handleBatchCreate(@Body() batchDto: BatchOperationDto) {
+    return this.tasksService.batchOperation(batchDto);
+  }
+
+  @Patch('batch')
+  @ApiOperation({ summary: 'Update multiple existing tasks' })
+  async handleBatchUpdate(@Body() batchDto: BatchOperationDto) {
+    return this.tasksService.batchOperation(batchDto);
+  }
+  @Delete('batch')
+  @ApiOperation({ summary: 'Delete multiple tasks by ID' })
+  async handleBatchDelete(@Body() batchDto: BatchOperationDto) {
+    return this.tasksService.batchOperation(batchDto);
   }
 
   @Get()
@@ -123,40 +141,4 @@ export class TasksController {
     return this.tasksService.remove(id);
   }
 
-  @Post('batch')
-  @ApiOperation({ summary: 'Batch process multiple tasks' })
-  async batchProcess(@Body() operations: { tasks: string[], action: string }) {
-    // Inefficient batch processing: Sequential processing instead of bulk operations
-    const { tasks: taskIds, action } = operations;
-    const results = [];
-    
-    // N+1 query problem: Processing tasks one by one
-    for (const taskId of taskIds) {
-      try {
-        let result;
-        
-        switch (action) {
-          case 'complete':
-            result = await this.tasksService.update(taskId, { status: TaskStatus.COMPLETED });
-            break;
-          case 'delete':
-            result = await this.tasksService.remove(taskId);
-            break;
-          default:
-            throw new HttpException(`Unknown action: ${action}`, HttpStatus.BAD_REQUEST);
-        }
-        
-        results.push({ taskId, success: true, result });
-      } catch (error) {
-        // Inconsistent error handling
-        results.push({ 
-          taskId, 
-          success: false, 
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
-    }
-    
-    return results;
-  }
 } 
