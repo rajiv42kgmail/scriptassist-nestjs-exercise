@@ -7,7 +7,8 @@
 - Next creating the task api it was giving dueDate error while passing in API paramater.
 - As it should passed as IsISO8601 format so I fixed the code.
 - Implemented task batch jobs and here is the API format for testing:
-For update:
+
+1. For update:
 {
   "operation": "update",
   "data": [
@@ -16,7 +17,7 @@ For update:
   ]
 }
 
-For create:
+2. For create:
 
 
 {
@@ -34,7 +35,7 @@ For create:
   ]
 }
 
-For delete:
+3. For delete:
 
 {
   "operation": "delete",
