@@ -6,6 +6,7 @@ import { TaskStatus } from '../enums/task-status.enum';
 import { TaskPriority } from '../enums/task-priority.enum';
 
 export class CreateTaskDto {
+
   @ApiProperty({ example: 'Complete project documentation' })
   @IsString()
   @IsNotEmpty()
@@ -39,7 +40,7 @@ export class CreateTaskDto {
   })
   dueDate: Date;
 
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: 'cd56160b-7c91-4baf-9016-2842cc103239' })
   @IsUUID()
   @IsNotEmpty()
   userId: string;

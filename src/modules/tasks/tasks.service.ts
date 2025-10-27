@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In,Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { BatchOperationDto,BatchOperationType  } from './dto/batch-tasks.dto';
+
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { TaskStatus } from './enums/task-status.enum';
@@ -32,12 +34,26 @@ export class TasksService {
     return savedTask;
   }
 
-  async findAll(): Promise<Task[]> {
+  async findAll() {
     // Inefficient implementation: retrieves all tasks without pagination
     // and loads all relations, causing potential performance issues
+   /* const [data, total,page,limit] = await this.tasksRepository.findAndCount({
+      relations: ['user'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { id: 'ASC' }, // Optional sorting
+    });
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };*/
     return this.tasksRepository.find({
       relations: ['user'],
     });
+
   }
 
   async findOne(id: string): Promise<Task> {
@@ -85,6 +101,7 @@ export class TasksService {
     // Inefficient implementation: two separate database calls
     const task = await this.findOne(id);
     await this.tasksRepository.remove(task);
+
   }
 
   async findByStatus(status: TaskStatus): Promise<Task[]> {
@@ -99,4 +116,52 @@ export class TasksService {
     task.status = status as any;
     return this.tasksRepository.save(task);
   }
+
+  async batchOperation(batchDto: BatchOperationDto) {
+    const { operation, data } = batchDto;
+
+    switch (operation) {
+      case BatchOperationType.UPDATE:
+        return this.batchUpdate(data);
+
+      case BatchOperationType.DELETE:
+        return this.batchDelete(data);
+
+      case BatchOperationType.CREATE:
+        return this.batchCreate(data);
+
+      default:
+        throw new Error(`Unsupported operation: ${operation}`);
+
+    }
+  }
+  private async batchUpdate(data: UpdateTaskDto[]) {
+    const results = [];
+
+    for (const dto of data) {
+      const existing = await this.tasksRepository.findOne({ where: { id: dto.id } });
+      if (!existing) continue;
+
+      const updated = await this.tasksRepository.save({ ...existing, ...dto });
+      results.push(updated);
+    }
+
+    return { message: 'Batch update successful', count: results.length, results };
+  }
+
+  private async batchDelete(data: UpdateTaskDto[]) {
+    const ids = data.map((d) => d.id);
+    await this.tasksRepository.delete({ id: In(ids) });
+    return { message: 'Batch delete successful', count: ids.length };
+  }
+
+  private async batchCreate(data: UpdateTaskDto[]) {
+    const newTasks = this.tasksRepository.create(data);
+    const saved = await this.tasksRepository.save(newTasks);
+    return { message: 'Batch create successful', count: saved.length, saved };
+  }
+
+
+
+
 }
