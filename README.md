@@ -47,7 +47,7 @@
   ]
 }
 
-Overview of architecture:
+**Overview of architecture:**
 
 1. Framework & Technology Stack
 
