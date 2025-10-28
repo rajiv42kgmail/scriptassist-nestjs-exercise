@@ -181,7 +181,6 @@ Modules group the above, configuration and utilities cross-cut.
 **Security Improvements:**
 * Used class-validator, class-transformer to validate DTOs, and avoided injection risks (SQL injection, NoSQL injection). I ensured incoming data is cleaned.
 * Managed JWT securely(short expiration, refresh tokens, secure storage).
-* Used environment variables for secrets and never commit them to the repo.
 * Used strong password hashing.
 * I didn't stored secrets in version control. Used environment variables, secret management. For example, hide  API keys. I ensured the .env is excluded and not in version control.
 * I validated headers, query parameters, ensure unexpected combinations don’t cause logic issues.
